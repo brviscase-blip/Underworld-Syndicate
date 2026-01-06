@@ -68,5 +68,6 @@ export enum GameView {
   SHOP = 'SHOP',
   RANKING = 'RANKING',
   ADM_EDITOR = 'ADM_EDITOR',
-  DEBUG = 'DEBUG'
+  DEBUG = 'DEBUG',
+  SETTINGS = 'SETTINGS'
 }

@@ -13,6 +13,7 @@ import ShopView from './components/ShopView';
 import DuelView from './components/DuelView';
 import AdmEditorView from './components/AdmEditorView';
 import DebugView from './components/DebugView';
+import SettingsView from './components/SettingsView';
 
 const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg';
 
@@ -153,7 +154,7 @@ const App: React.FC = () => {
         xp: newXp,
         level: newLevel,
         maxXp: newMaxXp,
-        energy: Math.max(0, prev.energy - 10) // Custom energy cost logic
+        energy: Math.max(0, prev.energy - 10)
       };
     });
     setActiveMission(null);
@@ -236,6 +237,13 @@ const App: React.FC = () => {
       case GameView.MISSIONS: return <MissionsView missions={MISSIONS} activeMission={activeMission} currentTime={currentTime} onStart={startMission} />;
       case GameView.SHOP: return <ShopView items={INITIAL_ITEMS} onBuy={buyItem} />;
       case GameView.DUELS: return <DuelView character={character} />;
+      case GameView.SETTINGS: return (
+        <SettingsView 
+          character={character}
+          onUpdateAvatar={(url) => setCharacter(prev => ({ ...prev, avatar: url }))} 
+          onClose={() => setCurrentView(GameView.PROFILE)} 
+        />
+      );
       case GameView.ADM_EDITOR: return (
         <AdmEditorView 
           character={character} 
