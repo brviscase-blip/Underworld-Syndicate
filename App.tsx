@@ -53,36 +53,42 @@ const App: React.FC = () => {
   // Load character from Supabase
   useEffect(() => {
     const loadCharacter = async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('name', 'GhostDog')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('characters')
+          .select('*')
+          .eq('name', 'GhostDog')
+          .single();
 
-      if (data && !error) {
-        setCharacter({
-          name: data.name,
-          level: data.level,
-          xp: data.xp,
-          maxXp: data.max_xp,
-          hp: data.hp,
-          maxHp: data.max_hp,
-          cash: data.cash,
-          gold: data.gold,
-          energy: data.energy,
-          maxEnergy: data.max_energy,
-          avatar: data.avatar || DEFAULT_AVATAR,
-          stats: {
-            strength: data.strength,
-            physique: data.physique,
-            luck: data.luck,
-            tenacity: data.tenacity
-          },
-          equipment: data.equipment,
-          inventory: data.inventory
-        });
+        if (data && !error) {
+          setCharacter({
+            name: data.name,
+            level: data.level,
+            xp: data.xp,
+            maxXp: data.max_xp,
+            hp: data.hp,
+            maxHp: data.max_hp,
+            cash: data.cash,
+            gold: data.gold,
+            energy: data.energy,
+            maxEnergy: data.max_energy,
+            avatar: data.avatar || DEFAULT_AVATAR,
+            stats: {
+              strength: data.strength,
+              physique: data.physique,
+              luck: data.luck,
+              tenacity: data.tenacity
+            },
+            equipment: data.equipment || { weapon: null, armor: null, accessory: null },
+            inventory: data.inventory || Array(25).fill(null)
+          });
+        }
+      } catch (err) {
+        console.warn('Database connection failed, using local fallback.', err);
+      } finally {
+        // Garantir que o app carregue mesmo se o Supabase falhar
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     };
 
     loadCharacter();
@@ -94,31 +100,36 @@ const App: React.FC = () => {
 
     const saveTimeout = setTimeout(async () => {
       setIsSyncing(true);
-      const { error } = await supabase
-        .from('characters')
-        .upsert({
-          name: character.name,
-          level: character.level,
-          xp: character.xp,
-          max_xp: character.maxXp,
-          hp: character.hp,
-          max_hp: character.maxHp,
-          cash: character.cash,
-          gold: character.gold,
-          energy: character.energy,
-          max_energy: character.maxEnergy,
-          avatar: character.avatar,
-          strength: character.stats.strength,
-          physique: character.stats.physique,
-          luck: character.stats.luck,
-          tenacity: character.stats.tenacity,
-          equipment: character.equipment,
-          inventory: character.inventory,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'name' });
+      try {
+        const { error } = await supabase
+          .from('characters')
+          .upsert({
+            name: character.name,
+            level: character.level,
+            xp: character.xp,
+            max_xp: character.maxXp,
+            hp: character.hp,
+            max_hp: character.maxHp,
+            cash: character.cash,
+            gold: character.gold,
+            energy: character.energy,
+            max_energy: character.maxEnergy,
+            avatar: character.avatar,
+            strength: character.stats.strength,
+            physique: character.stats.physique,
+            luck: character.stats.luck,
+            tenacity: character.stats.tenacity,
+            equipment: character.equipment,
+            inventory: character.inventory,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'name' });
 
-      if (error) console.error('Sync Error:', error);
-      setIsSyncing(false);
+        if (error) console.error('Sync Error:', error);
+      } catch (err) {
+        console.error('Network Error during sync:', err);
+      } finally {
+        setIsSyncing(false);
+      }
     }, 1500);
 
     return () => clearTimeout(saveTimeout);

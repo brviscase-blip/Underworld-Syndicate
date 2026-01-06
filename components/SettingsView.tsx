@@ -10,17 +10,6 @@ interface SettingsViewProps {
   onClose: () => void;
 }
 
-const MODELS_2D = [
-  "https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg",
-  "https://cdn.pixabay.com/photo/2023/07/26/16/33/man-8151610_1280.jpg",
-  "https://cdn.pixabay.com/photo/2024/02/12/17/23/ai-generated-8569065_1280.jpg",
-  "https://cdn.pixabay.com/photo/2023/04/23/15/22/ai-generated-7945952_1280.jpg",
-  "https://cdn.pixabay.com/photo/2023/09/27/12/15/woman-8279482_1280.jpg",
-  "https://cdn.pixabay.com/photo/2023/09/29/18/12/ai-generated-8284534_1280.jpg",
-  "https://cdn.pixabay.com/photo/2023/10/06/13/37/girl-8298282_1280.jpg",
-  "https://cdn.pixabay.com/photo/2024/02/12/17/23/ai-generated-8569064_1280.jpg"
-];
-
 const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg';
 
 const SettingsView: React.FC<SettingsViewProps> = ({ character, onUpdateAvatar, onClose }) => {
@@ -98,7 +87,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ character, onUpdateAvatar, 
             
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="group cursor-pointer border-2 border-dashed border-[#1e293b] hover:border-[#3b82f6]/50 rounded-xl p-8 flex flex-col items-center justify-center transition-all bg-[#0b0e14]/50 hover:bg-[#3b82f6]/5"
+              className="group cursor-pointer border-2 border-dashed border-[#1e293b] hover:border-[#3b82f6]/50 rounded-xl p-12 flex flex-col items-center justify-center transition-all bg-[#0b0e14]/50 hover:bg-[#3b82f6]/5 min-h-[250px]"
             >
               <input 
                 type="file" 
@@ -107,42 +96,24 @@ const SettingsView: React.FC<SettingsViewProps> = ({ character, onUpdateAvatar, 
                 accept="image/*" 
                 className="hidden" 
               />
-              <div className="w-12 h-12 bg-[#1e293b] rounded-full flex items-center justify-center mb-3 group-hover:bg-[#3b82f6] transition-colors">
-                <Icons name="camera" size={24} color={isUploading ? '#64748b' : 'white'} />
+              <div className="w-16 h-16 bg-[#1e293b] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#3b82f6] transition-colors shadow-lg shadow-black/50">
+                <Icons name="camera" size={32} color={isUploading ? '#64748b' : 'white'} />
               </div>
-              <p className="text-[10px] font-bold text-white uppercase tracking-widest">Clique para selecionar imagem</p>
-              <p className="text-[8px] text-slate-500 mt-1 uppercase">PNG, JPG ou WEBP (Max 2MB recomendado)</p>
+              <p className="text-xs font-bold text-white uppercase tracking-[0.2em] text-center">Selecionar Nova Assinatura Visual</p>
+              <p className="text-[9px] text-slate-500 mt-2 uppercase tracking-widest">Formatos aceitos: PNG, JPG, WEBP</p>
             </div>
           </section>
 
-          {/* GALLERY SECTION */}
-          <section className="bg-[#11151d] border border-[#1e293b] rounded-xl overflow-hidden shadow-lg">
-            <div className="bg-[#171c26] px-4 py-2 border-b border-[#1e293b]">
-              <h3 className="text-[10px] font-bold text-white uppercase tracking-widest">Modelos do Sindicato</h3>
+          <div className="p-6 bg-[#3b82f6]/5 border border-[#3b82f6]/20 rounded-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-2 h-2 rounded-full bg-[#3b82f6]"></div>
+              <span className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-widest">Protocolo de Segurança</span>
             </div>
-            <div className="p-4 bg-[#0b0e14]">
-              <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-4 gap-3">
-                {MODELS_2D.map((url, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => onUpdateAvatar(url)}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 group ${
-                      character.avatar === url 
-                        ? 'border-[#3b82f6] shadow-lg shadow-[#3b82f6]/20' 
-                        : 'border-[#1e293b] opacity-50 hover:opacity-100 hover:border-[#3b82f6]/50'
-                    }`}
-                  >
-                    <img src={url} alt={`Modelo ${idx}`} className="w-full h-full object-cover" />
-                    {character.avatar === url && (
-                      <div className="absolute inset-0 bg-[#3b82f6]/20 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]"></div>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
+            <p className="text-[9px] text-[#64748b] leading-relaxed uppercase tracking-wider">
+              O Sindicato recomenda o uso de imagens com proporção 1:1 para evitar distorções no sistema de monitoramento. 
+              Arquivos superiores a 2MB podem sofrer latência no processamento de rede.
+            </p>
+          </div>
         </div>
       </div>
     </div>

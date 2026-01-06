@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Character } from '../types';
 import Icons from './Icons';
+import AvatarDisplay from './AvatarDisplay';
 
 interface DuelViewProps {
   character: Character;
@@ -149,8 +150,8 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
           </div>
           
           <div className="relative flex-1 flex items-center justify-center mb-2 z-10">
-            <div className={`transition-transform duration-300 ${status === 'PLAYER_TURN' ? 'scale-110' : 'scale-100 opacity-80'}`}>
-              <Icons name="profile" size={64} color={status === 'PLAYER_TURN' ? '#3b82f6' : '#64748b'} />
+            <div className={`transition-all duration-300 ${status === 'PLAYER_TURN' ? 'scale-110' : 'scale-100 opacity-60 grayscale-[0.5]'}`}>
+              <AvatarDisplay avatar={character.avatar} size={80} className="border-2 border-[#3b82f6]/30 rounded-lg shadow-xl" />
             </div>
           </div>
 
@@ -189,7 +190,7 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
           </div>
 
           <div className="relative flex-1 flex items-center justify-center mb-2 z-10">
-            <div className={`transition-transform duration-300 ${status === 'ENEMY_TURN' ? 'scale-110' : 'scale-100 opacity-60'}`}>
+            <div className={`transition-transform duration-300 ${status === 'ENEMY_TURN' ? 'scale-110' : 'scale-100 opacity-60 grayscale'}`}>
               <Icons name="skull" size={64} color={status === 'ENEMY_TURN' ? '#ef4444' : '#334155'} />
             </div>
           </div>
