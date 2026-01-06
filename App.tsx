@@ -10,6 +10,8 @@ import ProfileView from './components/ProfileView';
 import MissionsView from './components/MissionsView';
 import ShopView from './components/ShopView';
 import DuelView from './components/DuelView';
+import AdmEditorView from './components/AdmEditorView';
+import DebugView from './components/DebugView';
 
 // Imagem padrão fixa baseada na solicitação (Estilo Seinen Mafia)
 const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg';
@@ -62,11 +64,14 @@ const App: React.FC = () => {
       let newXp = prev.xp + mission.rewards.xp;
       let newLevel = prev.level;
       let newMaxXp = prev.maxXp;
-      if (newXp >= prev.maxXp) {
+      
+      // Level Up Logic
+      while (newXp >= newMaxXp) {
         newLevel += 1;
-        newXp -= prev.maxXp;
-        newMaxXp = Math.floor(prev.maxXp * 1.5);
+        newXp -= newMaxXp;
+        newMaxXp = Math.floor(newMaxXp * 1.5);
       }
+      
       return {
         ...prev,
         cash: prev.cash + mission.rewards.cash,
@@ -84,6 +89,12 @@ const App: React.FC = () => {
     if (!mission || activeMission) return;
     const endTime = Date.now() + (mission.duration * 1000);
     setActiveMission({ id: missionId, endTime });
+  };
+
+  const instantFinishMission = () => {
+    if (!activeMission) return;
+    const mission = MISSIONS.find(m => m.id === activeMission.id);
+    if (mission) completeMission(mission);
   };
 
   const equipItem = (item: Item, inventoryIndex: number) => {
@@ -125,12 +136,47 @@ const App: React.FC = () => {
     });
   };
 
+  const handleUpdateCharacter = (updated: Character | ((prev: Character) => Character)) => {
+    if (typeof updated === 'function') {
+      setCharacter(prev => {
+        const result = updated(prev);
+        // Level up check if XP was modified
+        let newXp = result.xp;
+        let newLevel = result.level;
+        let newMaxXp = result.maxXp;
+        while (newXp >= newMaxXp) {
+          newLevel += 1;
+          newXp -= newMaxXp;
+          newMaxXp = Math.floor(newMaxXp * 1.5);
+        }
+        return { ...result, xp: newXp, level: newLevel, maxXp: newMaxXp };
+      });
+    } else {
+      setCharacter(updated);
+    }
+  };
+
   const renderView = () => {
     switch (currentView) {
       case GameView.PROFILE: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
       case GameView.MISSIONS: return <MissionsView missions={MISSIONS} activeMission={activeMission} currentTime={currentTime} onStart={startMission} />;
       case GameView.SHOP: return <ShopView items={INITIAL_ITEMS} onBuy={buyItem} />;
       case GameView.DUELS: return <DuelView character={character} />;
+      case GameView.ADM_EDITOR: return (
+        <AdmEditorView 
+          character={character} 
+          onUpdate={handleUpdateCharacter} 
+          onClose={() => setCurrentView(GameView.PROFILE)} 
+        />
+      );
+      case GameView.DEBUG: return (
+        <DebugView 
+          character={character}
+          onQuickUpdate={handleUpdateCharacter}
+          onFinishMission={instantFinishMission}
+          onClose={() => setCurrentView(GameView.PROFILE)}
+        />
+      );
       default: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
     }
   };
@@ -143,7 +189,7 @@ const App: React.FC = () => {
         <aside className="w-full md:w-56 flex flex-col gap-3 h-full overflow-hidden shrink-0">
           <Navigation currentView={currentView} setView={setCurrentView} />
           
-          <div className="bg-[#11151d] border border-[#1e293b] rounded-lg p-3 shadow-xl">
+          <div className="bg-[#11151d] border border-[#1e293b] rounded-lg p-3 shadow-xl mt-auto">
             <h3 className="text-[10px] font-bold text-[#3b82f6] uppercase mb-2 tracking-widest">Painel Operacional</h3>
             <div className="space-y-3">
               <div>

@@ -17,28 +17,47 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView }) => {
     { id: GameView.RANKING, label: 'Ranking Geral', icon: 'ranking' },
   ];
 
+  const handleAdmClick = () => {
+    const code = prompt("BACKDOOR ACCESS REQUIRED: Enter Authorization Code");
+    if (code?.toUpperCase() === "ADM") {
+      setView(GameView.ADM_EDITOR);
+    } else if (code?.toUpperCase() === "DEBUG") {
+      setView(GameView.DEBUG);
+    }
+  };
+
   return (
-    <nav className="flex flex-col gap-2 bg-[#11151d] border border-[#1e293b] rounded-lg p-2 shadow-xl">
-      {menuItems.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => setView(item.id)}
-          className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 group ${
-            currentView === item.id
-              ? 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20'
-              : 'text-[#94a3b8] hover:bg-[#1e293b] hover:text-white'
-          }`}
-        >
-          <Icons 
-            name={item.icon} 
-            size={18} 
-            color={currentView === item.id ? '#3b82f6' : '#64748b'}
-            className="transition-transform group-hover:scale-110" 
-          />
-          {item.label}
-        </button>
-      ))}
-    </nav>
+    <div className="flex flex-col h-full gap-2">
+      <nav className="flex flex-col gap-2 bg-[#11151d] border border-[#1e293b] rounded-lg p-2 shadow-xl flex-1">
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setView(item.id)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 group ${
+              currentView === item.id
+                ? 'bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20'
+                : 'text-[#94a3b8] hover:bg-[#1e293b] hover:text-white'
+            }`}
+          >
+            <Icons 
+              name={item.icon} 
+              size={18} 
+              color={currentView === item.id ? '#3b82f6' : '#64748b'}
+              className="transition-transform group-hover:scale-110" 
+            />
+            {item.label}
+          </button>
+        ))}
+      </nav>
+      
+      <button
+        onClick={handleAdmClick}
+        className="flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest text-[#1e293b] hover:text-[#3b82f6] transition-all duration-300 bg-[#0b0e14]/50 border border-[#1e293b] mt-auto"
+      >
+        <Icons name="settings" size={14} />
+        Configurações
+      </button>
+    </div>
   );
 };
 
