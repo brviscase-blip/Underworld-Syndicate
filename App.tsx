@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Character, GameView, Item, ItemType, Mission } from './types';
 import { INITIAL_ITEMS, MISSIONS } from './constants';
+import { supabase } from './supabase';
 
 // Components
 import Header from './components/Header';
@@ -13,7 +14,6 @@ import DuelView from './components/DuelView';
 import AdmEditorView from './components/AdmEditorView';
 import DebugView from './components/DebugView';
 
-// Imagem padrão fixa baseada na solicitação (Estilo Seinen Mafia)
 const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg';
 
 const App: React.FC = () => {
@@ -46,6 +46,82 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<GameView>(GameView.PROFILE);
   const [activeMission, setActiveMission] = useState<{ id: string, endTime: number } | null>(null);
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load character from Supabase
+  useEffect(() => {
+    const loadCharacter = async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('name', 'GhostDog')
+        .single();
+
+      if (data && !error) {
+        setCharacter({
+          name: data.name,
+          level: data.level,
+          xp: data.xp,
+          maxXp: data.max_xp,
+          hp: data.hp,
+          maxHp: data.max_hp,
+          cash: data.cash,
+          gold: data.gold,
+          energy: data.energy,
+          maxEnergy: data.max_energy,
+          avatar: data.avatar || DEFAULT_AVATAR,
+          stats: {
+            strength: data.strength,
+            physique: data.physique,
+            luck: data.luck,
+            tenacity: data.tenacity
+          },
+          equipment: data.equipment,
+          inventory: data.inventory
+        });
+      }
+      setIsLoaded(true);
+    };
+
+    loadCharacter();
+  }, []);
+
+  // Auto-save to Supabase (Debounced logic)
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const saveTimeout = setTimeout(async () => {
+      setIsSyncing(true);
+      const { error } = await supabase
+        .from('characters')
+        .upsert({
+          name: character.name,
+          level: character.level,
+          xp: character.xp,
+          max_xp: character.maxXp,
+          hp: character.hp,
+          max_hp: character.maxHp,
+          cash: character.cash,
+          gold: character.gold,
+          energy: character.energy,
+          max_energy: character.maxEnergy,
+          avatar: character.avatar,
+          strength: character.stats.strength,
+          physique: character.stats.physique,
+          luck: character.stats.luck,
+          tenacity: character.stats.tenacity,
+          equipment: character.equipment,
+          inventory: character.inventory,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'name' });
+
+      if (error) console.error('Sync Error:', error);
+      setIsSyncing(false);
+    }, 1500);
+
+    return () => clearTimeout(saveTimeout);
+  }, [character, isLoaded]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
@@ -65,7 +141,6 @@ const App: React.FC = () => {
       let newLevel = prev.level;
       let newMaxXp = prev.maxXp;
       
-      // Level Up Logic
       while (newXp >= newMaxXp) {
         newLevel += 1;
         newXp -= newMaxXp;
@@ -78,7 +153,7 @@ const App: React.FC = () => {
         xp: newXp,
         level: newLevel,
         maxXp: newMaxXp,
-        energy: Math.min(prev.energy + 5, prev.maxEnergy)
+        energy: Math.max(0, prev.energy - 10) // Custom energy cost logic
       };
     });
     setActiveMission(null);
@@ -86,7 +161,7 @@ const App: React.FC = () => {
 
   const startMission = (missionId: string) => {
     const mission = MISSIONS.find(m => m.id === missionId);
-    if (!mission || activeMission) return;
+    if (!mission || activeMission || character.energy < 10) return;
     const endTime = Date.now() + (mission.duration * 1000);
     setActiveMission({ id: missionId, endTime });
   };
@@ -140,7 +215,6 @@ const App: React.FC = () => {
     if (typeof updated === 'function') {
       setCharacter(prev => {
         const result = updated(prev);
-        // Level up check if XP was modified
         let newXp = result.xp;
         let newLevel = result.level;
         let newMaxXp = result.maxXp;
@@ -181,6 +255,17 @@ const App: React.FC = () => {
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0b0e14] text-[#3b82f6] font-mono">
+        <div className="text-2xl font-black mb-4 animate-pulse uppercase tracking-[0.5em]">Establishing Connection...</div>
+        <div className="w-64 h-1 bg-[#1e293b] rounded-full overflow-hidden">
+          <div className="h-full bg-[#3b82f6] animate-progress-fast"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col max-w-[1400px] mx-auto p-2 md:p-4 gap-3 overflow-hidden bg-[#0b0e14]">
       <Header character={character} />
@@ -190,7 +275,10 @@ const App: React.FC = () => {
           <Navigation currentView={currentView} setView={setCurrentView} />
           
           <div className="bg-[#11151d] border border-[#1e293b] rounded-lg p-3 shadow-xl mt-auto">
-            <h3 className="text-[10px] font-bold text-[#3b82f6] uppercase mb-2 tracking-widest">Painel Operacional</h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-widest">Painel Operacional</h3>
+              {isSyncing && <span className="text-[8px] text-green-500 font-mono animate-pulse uppercase">Syncing...</span>}
+            </div>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-[10px] mb-1 font-mono">
@@ -223,7 +311,7 @@ const App: React.FC = () => {
       </div>
 
       <footer className="text-center text-[9px] text-slate-700 uppercase tracking-[0.3em] py-1 shrink-0 font-black">
-        Underworld Syndicate • Criminal Empire Sim
+        Underworld Syndicate • Database Active: SUPABASE_CLOUD
       </footer>
     </div>
   );
