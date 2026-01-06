@@ -11,7 +11,6 @@ interface NavigationProps {
 const Navigation: React.FC<NavigationProps> = ({ currentView, setView }) => {
   const menuItems = [
     { id: GameView.PROFILE, label: 'Perfil Ativo', icon: 'profile' },
-    { id: GameView.AVATAR_CREATOR, label: 'Customizar Herói', icon: 'avatar' },
     { id: GameView.MISSIONS, label: 'Missões', icon: 'mission' },
     { id: GameView.DUELS, label: 'Duelos', icon: 'duel' },
     { id: GameView.SHOP, label: 'Loja Obscura', icon: 'shop' },

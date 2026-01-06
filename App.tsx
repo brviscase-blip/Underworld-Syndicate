@@ -10,10 +10,9 @@ import ProfileView from './components/ProfileView';
 import MissionsView from './components/MissionsView';
 import ShopView from './components/ShopView';
 import DuelView from './components/DuelView';
-import AvatarCreator from './components/AvatarCreator';
 
-// Usando uma ilustração 2D de alta qualidade como padrão inicial
-const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/07/26/16/33/man-8151610_1280.jpg';
+// Imagem padrão fixa baseada na solicitação (Estilo Seinen Mafia)
+const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2023/11/02/16/00/anime-8361021_1280.jpg';
 
 const App: React.FC = () => {
   const [character, setCharacter] = useState<Character>({
@@ -126,19 +125,13 @@ const App: React.FC = () => {
     });
   };
 
-  const saveAvatar = (avatar: string) => {
-    setCharacter(prev => ({ ...prev, avatar }));
-    setCurrentView(GameView.PROFILE);
-  };
-
   const renderView = () => {
     switch (currentView) {
-      case GameView.PROFILE: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} onEditAvatar={() => setCurrentView(GameView.AVATAR_CREATOR)} />;
-      case GameView.AVATAR_CREATOR: return <AvatarCreator initialAvatar={character.avatar} onSave={saveAvatar} />;
+      case GameView.PROFILE: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
       case GameView.MISSIONS: return <MissionsView missions={MISSIONS} activeMission={activeMission} currentTime={currentTime} onStart={startMission} />;
       case GameView.SHOP: return <ShopView items={INITIAL_ITEMS} onBuy={buyItem} />;
       case GameView.DUELS: return <DuelView character={character} />;
-      default: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} onEditAvatar={() => setCurrentView(GameView.AVATAR_CREATOR)} />;
+      default: return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
     }
   };
 

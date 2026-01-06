@@ -66,6 +66,5 @@ export enum GameView {
   MISSIONS = 'MISSIONS',
   DUELS = 'DUELS',
   SHOP = 'SHOP',
-  RANKING = 'RANKING',
-  AVATAR_CREATOR = 'AVATAR_CREATOR'
+  RANKING = 'RANKING'
 }

@@ -8,10 +8,9 @@ interface ProfileViewProps {
   character: Character;
   onEquip: (item: Item, index: number) => void;
   onUnequip: (slot: keyof Character['equipment']) => void;
-  onEditAvatar: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ character, onEquip, onUnequip, onEditAvatar }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ character, onEquip, onUnequip }) => {
   const calculateTotalAttack = () => {
     let bonus = character.equipment.weapon?.stats.attack || 0;
     return character.stats.strength * 2 + bonus;
@@ -28,12 +27,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ character, onEquip, onUnequip
         <div className="bg-[#0b0e14] border border-[#1e293b] rounded-xl overflow-hidden shadow-lg p-4 flex items-center gap-6 shrink-0">
           <div className="relative shrink-0">
             <AvatarDisplay avatar={character.avatar} size={120} className="border-2 border-[#1e293b] rounded-xl shadow-2xl" />
-            <button 
-              onClick={onEditAvatar}
-              className="absolute -bottom-1 -right-1 bg-[#3b82f6] text-white p-1.5 rounded-md shadow-xl hover:scale-110 transition-transform flex items-center justify-center"
-            >
-              <Icons name="camera" size={14} color="white" />
-            </button>
           </div>
           <div className="flex-1">
              <h3 className="text-lg font-black text-white uppercase tracking-tighter">{character.name}</h3>
