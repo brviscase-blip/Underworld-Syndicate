@@ -33,6 +33,7 @@ export interface Character {
   gold: number;
   energy: number;
   maxEnergy: number;
+  avatar: string; // URL da imagem ou Base64
   stats: {
     strength: number;
     physique: number;
@@ -65,5 +66,6 @@ export enum GameView {
   MISSIONS = 'MISSIONS',
   DUELS = 'DUELS',
   SHOP = 'SHOP',
-  RANKING = 'RANKING'
+  RANKING = 'RANKING',
+  AVATAR_CREATOR = 'AVATAR_CREATOR'
 }

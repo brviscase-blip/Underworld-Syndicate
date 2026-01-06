@@ -10,10 +10,13 @@ import ProfileView from './components/ProfileView';
 import MissionsView from './components/MissionsView';
 import ShopView from './components/ShopView';
 import DuelView from './components/DuelView';
+import AvatarCreator from './components/AvatarCreator';
+
+const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Gunnar';
 
 const App: React.FC = () => {
   const [character, setCharacter] = useState<Character>({
-    name: 'GnomoZoiudo',
+    name: 'RagnarZoiudo',
     level: 1,
     xp: 0,
     maxXp: 100,
@@ -23,6 +26,7 @@ const App: React.FC = () => {
     gold: 5,
     energy: 100,
     maxEnergy: 100,
+    avatar: DEFAULT_AVATAR,
     stats: {
       strength: 10,
       physique: 10,
@@ -163,10 +167,17 @@ const App: React.FC = () => {
     });
   };
 
+  const saveAvatar = (avatar: string) => {
+    setCharacter(prev => ({ ...prev, avatar }));
+    setCurrentView(GameView.PROFILE);
+  };
+
   const renderView = () => {
     switch (currentView) {
       case GameView.PROFILE:
-        return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
+        return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} onEditAvatar={() => setCurrentView(GameView.AVATAR_CREATOR)} />;
+      case GameView.AVATAR_CREATOR:
+        return <AvatarCreator initialAvatar={character.avatar} onSave={saveAvatar} />;
       case GameView.MISSIONS:
         return <MissionsView missions={MISSIONS} activeMission={activeMission} currentTime={currentTime} onStart={startMission} />;
       case GameView.SHOP:
@@ -174,7 +185,7 @@ const App: React.FC = () => {
       case GameView.DUELS:
         return <DuelView character={character} />;
       default:
-        return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} />;
+        return <ProfileView character={character} onEquip={equipItem} onUnequip={unequipItem} onEditAvatar={() => setCurrentView(GameView.AVATAR_CREATOR)} />;
     }
   };
 
@@ -188,16 +199,16 @@ const App: React.FC = () => {
           
           {/* Quick Stats Mini-Card */}
           <div className="bg-[#11151d] border border-[#1e293b] rounded-lg p-4 shadow-xl">
-            <h3 className="text-xs font-bold text-[#94a3b8] uppercase mb-3 tracking-widest">Resumo Rápido</h3>
+            <h3 className="text-xs font-bold text-[#94a3b8] uppercase mb-3 tracking-widest text-[#fbbf24]">Painel de Status</h3>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-[#94a3b8]">Energia</span>
-                  <span className="text-[#2dd4bf] font-mono">{character.energy}/{character.maxEnergy}</span>
+                  <span className="text-[#fbbf24] font-mono">{character.energy}/{character.maxEnergy}</span>
                 </div>
                 <div className="h-1.5 w-full bg-[#1e293b] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#2dd4bf] to-[#0d9488] transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-[#fbbf24] to-[#d97706] transition-all duration-500"
                     style={{ width: `${(character.energy / character.maxEnergy) * 100}%` }}
                   />
                 </div>
@@ -219,8 +230,8 @@ const App: React.FC = () => {
         </aside>
 
         <main className="flex-1 bg-[#11151d] border border-[#1e293b] rounded-lg shadow-2xl relative overflow-hidden flex flex-col">
-          {/* Header Accent Bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-[#2dd4bf] via-[#f472b6] to-[#fbbf24]"></div>
+          {/* Header Accent Bar - Golden as Questland */}
+          <div className="h-1 w-full bg-gradient-to-r from-[#fbbf24] via-[#f59e0b] to-[#b45309]"></div>
           
           <div className="p-6 flex-1 overflow-y-auto">
             {renderView()}
@@ -229,7 +240,7 @@ const App: React.FC = () => {
       </div>
 
       <footer className="text-center text-[10px] text-slate-600 uppercase tracking-[0.2em] py-4">
-        Underworld Syndicate v1.0.4 • © 2025 Digital Mafia Corp.
+        Underworld Syndicate v1.1.0 • Quest Edition
       </footer>
     </div>
   );

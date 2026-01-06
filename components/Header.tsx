@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Character } from '../types';
+import AvatarDisplay from './AvatarDisplay';
 
 interface HeaderProps {
   character: Character;
@@ -13,10 +14,8 @@ const Header: React.FC<HeaderProps> = ({ character }) => {
     <header className="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#11151d] border border-[#1e293b] rounded-lg p-4 shadow-xl">
       <div className="flex items-center gap-4">
         <div className="relative group">
-          <div className="w-16 h-16 bg-[#1e293b] rounded-md border-2 border-[#2dd4bf] overflow-hidden flex items-center justify-center text-3xl shadow-lg shadow-[#2dd4bf]/10">
-            👤
-          </div>
-          <div className="absolute -bottom-2 -right-2 bg-[#2dd4bf] text-[#0b0e14] text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-md">
+          <AvatarDisplay avatar={character.avatar} size={64} className="border-2 border-[#fbbf24] shadow-lg shadow-[#fbbf24]/10 rounded-md" />
+          <div className="absolute -bottom-2 -right-2 bg-[#fbbf24] text-[#0b0e14] text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-md">
             Lvl {character.level}
           </div>
         </div>
@@ -24,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ character }) => {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
             {character.name}
-            <span className="text-[10px] bg-[#1e293b] text-[#94a3b8] px-2 py-0.5 rounded font-mono uppercase">ROAD</span>
+            <span className="text-[10px] bg-[#1e293b] text-[#94a3b8] px-2 py-0.5 rounded font-mono uppercase">SYNDICATE</span>
           </h1>
           <div className="mt-2 w-48 md:w-64">
             <div className="flex justify-between text-[10px] text-[#94a3b8] uppercase font-bold mb-1 tracking-wider">
@@ -33,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ character }) => {
             </div>
             <div className="h-1.5 w-full bg-[#1e293b] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-[#2dd4bf] to-[#0d9488] transition-all duration-700 ease-out"
+                className="h-full bg-gradient-to-r from-[#fbbf24] to-[#d97706] transition-all duration-700 ease-out"
                 style={{ width: `${xpPercent}%` }}
               />
             </div>
