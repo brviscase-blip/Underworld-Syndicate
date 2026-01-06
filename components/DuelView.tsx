@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Character } from '../types';
+import Icons from './Icons';
 
 interface DuelViewProps {
   character: Character;
@@ -26,7 +27,7 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
     const enemyHp = 80 + (character.level * 15);
     setPlayer({ hp: character.hp, maxHp: character.maxHp, isGuarding: false });
     setEnemy({ hp: enemyHp, maxHp: enemyHp, isGuarding: false });
-    setLog(["Inimigo avistado! Prepare-se para o combate."]);
+    setLog(["Relatório: Alvo localizado. Iniciando protocolo de combate."]);
     setStatus('PLAYER_TURN');
   };
 
@@ -43,33 +44,32 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
     let hit = true;
     let msg = "";
 
-    // Reset player guard from previous turn at start of action
     setPlayer(p => ({ ...p, isGuarding: false }));
 
     switch (action) {
       case 'BASIC':
         damage = 10 + Math.floor(character.stats.strength * 0.8);
-        msg = `Você desferiu um Jab direto! (-${damage} HP)`;
+        msg = `Sindicato: Ataque direto executado. Dano: ${damage}.`;
         break;
       case 'HEAVY':
         hit = Math.random() > 0.3;
         damage = hit ? 20 + character.stats.strength : 0;
-        msg = hit ? `GOLPE BRUTAL! Você acertou em cheio! (-${damage} HP)` : "Você tentou um golpe pesado mas errou feio!";
+        msg = hit ? `Sindicato: Carga máxima atingida! Dano: ${damage}.` : "Erro: O alvo se esquivou do golpe pesado.";
         break;
       case 'DEFEND':
         setPlayer(p => ({ ...p, isGuarding: true }));
-        addLog("Você entrou em Postura Defensiva. Próximo dano será reduzido.");
+        addLog("Protocolo: Postura defensiva ativada. Redução de dano: 50%.");
         finishPlayerTurn();
         return;
       case 'DIRTY':
         damage = 5 + Math.floor(character.stats.luck * 0.5);
         const stun = Math.random() > 0.6;
-        msg = `Golpe Baixo! ${stun ? "O inimigo ficou atordoado!" : ""}`;
+        msg = `Tática: Golpe baixo aplicado. ${stun ? "Alvo desestabilizado." : ""}`;
         if (stun) {
            applyDamageToEnemy(damage);
            addLog(msg);
            setIsProcessing(false);
-           return; // Skip enemy turn
+           return; 
         }
         break;
     }
@@ -97,7 +97,6 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
     }, 1000);
   };
 
-  // Enemy AI logic
   useEffect(() => {
     if (status === 'ENEMY_TURN' && !isProcessing) {
       const runEnemyTurn = async () => {
@@ -108,7 +107,7 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
         
         if (shouldDefend) {
           setEnemy(e => ({ ...e, isGuarding: true }));
-          addLog("O inimigo está se protegendo!");
+          addLog("Alvo: O inimigo está em posição de defesa!");
         } else {
           const dmg = 8 + (character.level * 2) + Math.floor(Math.random() * 5);
           const finalDmg = player.isGuarding ? Math.floor(dmg * 0.5) : dmg;
@@ -119,7 +118,7 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
             return { ...p, hp: newHp, isGuarding: false };
           });
           
-          addLog(`O inimigo contra-atacou! (-${finalDmg} HP) ${player.isGuarding ? "[DEFENDIDO]" : ""}`);
+          addLog(`Alvo: Contra-ataque recebido. Dano sofrido: ${finalDmg}.`);
         }
 
         if (player.hp > 0) setStatus('PLAYER_TURN');
@@ -131,35 +130,36 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
 
   const getHealthColor = (hp: number, max: number) => {
     const pct = (hp / max) * 100;
-    if (pct > 60) return 'bg-emerald-500';
-    if (pct > 25) return 'bg-amber-500';
+    if (pct > 60) return 'bg-[#3b82f6]';
+    if (pct > 25) return 'bg-[#60a5fa]';
     return 'bg-red-500';
   };
 
   return (
-    <div className="space-y-6">
-      {/* Combatants Header */}
-      <div className="flex flex-col md:flex-row gap-6 items-stretch">
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4 items-stretch h-56">
         {/* Player Side */}
-        <div className="flex-1 bg-[#0b0e14] border border-[#1e293b] rounded-xl p-6 flex flex-col relative overflow-hidden">
-          <div className="flex justify-between items-start mb-4 z-10">
+        <div className="flex-1 bg-[#0b0e14] border border-[#1e293b] rounded-lg p-4 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-2 z-10">
             <div>
-              <h3 className="text-lg font-bold text-white leading-none">{character.name}</h3>
-              <p className="text-[10px] text-[#2dd4bf] font-mono mt-1 uppercase tracking-widest">VOCÊ</p>
+              <h3 className="text-sm font-bold text-white leading-none uppercase tracking-wider">{character.name}</h3>
+              <p className="text-[8px] text-[#3b82f6] font-mono mt-1 uppercase tracking-widest">SINDICATO</p>
             </div>
-            {player.isGuarding && <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/30 animate-pulse">ESCUDO ATIVO</span>}
+            {player.isGuarding && <div className="bg-[#3b82f6]/20 text-[#3b82f6] text-[8px] px-1.5 py-0.5 rounded border border-[#3b82f6]/30 animate-pulse font-bold">DEFESA ATIVA</div>}
           </div>
           
-          <div className="relative h-24 flex items-center justify-center mb-4 z-10">
-            <span className={`text-6xl transition-transform duration-300 ${status === 'PLAYER_TURN' ? 'scale-110' : 'scale-100 opacity-80'}`}>👤</span>
+          <div className="relative flex-1 flex items-center justify-center mb-2 z-10">
+            <div className={`transition-transform duration-300 ${status === 'PLAYER_TURN' ? 'scale-110' : 'scale-100 opacity-80'}`}>
+              <Icons name="profile" size={64} color={status === 'PLAYER_TURN' ? '#3b82f6' : '#64748b'} />
+            </div>
           </div>
 
-          <div className="space-y-1.5 z-10">
-            <div className="flex justify-between text-[10px] font-bold text-[#94a3b8] uppercase">
-              <span>Energia Vital</span>
+          <div className="space-y-1 z-10">
+            <div className="flex justify-between text-[8px] font-bold text-slate-500 uppercase">
+              <span>Integridade</span>
               <span className="font-mono">{player.hp} / {player.maxHp}</span>
             </div>
-            <div className="h-2 w-full bg-[#1e293b] rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#1e293b] rounded-full overflow-hidden">
               <div 
                 className={`h-full transition-all duration-500 ${getHealthColor(player.hp, player.maxHp)}`}
                 style={{ width: `${(player.hp / player.maxHp) * 100}%` }}
@@ -169,35 +169,37 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
         </div>
 
         {/* VS Center */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center shrink-0">
           <div className="relative group">
-            <div className={`w-14 h-14 rounded-full bg-[#171c26] border-2 border-[#1e293b] flex items-center justify-center shadow-2xl transition-colors ${status !== 'IDLE' ? 'border-[#f472b6]' : ''}`}>
-               <span className="text-xl font-black italic text-[#f472b6]">VS</span>
+            <div className={`w-10 h-10 rounded-full bg-[#171c26] border-2 border-[#1e293b] flex items-center justify-center shadow-2xl transition-colors ${status !== 'IDLE' ? 'border-[#3b82f6]' : ''}`}>
+               <span className="text-xs font-black italic text-[#3b82f6]">VS</span>
             </div>
-            {isProcessing && <div className="absolute -inset-2 border-2 border-[#f472b6]/30 border-t-[#f472b6] rounded-full animate-spin"></div>}
+            {isProcessing && <div className="absolute -inset-1.5 border-2 border-[#3b82f6]/30 border-t-[#3b82f6] rounded-full animate-spin"></div>}
           </div>
         </div>
 
         {/* Enemy Side */}
-        <div className="flex-1 bg-[#0b0e14] border border-[#1e293b] rounded-xl p-6 flex flex-col relative overflow-hidden">
-          <div className="flex justify-between items-start mb-4 z-10">
-            {enemy.isGuarding && <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/30 animate-pulse">ESCUDO ATIVO</span>}
+        <div className="flex-1 bg-[#0b0e14] border border-[#1e293b] rounded-lg p-4 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-2 z-10">
+            {enemy.isGuarding && <div className="bg-[#3b82f6]/20 text-[#3b82f6] text-[8px] px-1.5 py-0.5 rounded border border-[#3b82f6]/30 animate-pulse font-bold">DEFESA ATIVA</div>}
             <div className="text-right">
-              <h3 className="text-lg font-bold text-[#94a3b8] leading-none">Rival Local</h3>
-              <p className="text-[10px] text-[#ef4444] font-mono mt-1 uppercase tracking-widest">INIMIGO</p>
+              <h3 className="text-sm font-bold text-slate-400 leading-none uppercase tracking-wider">Rival Local</h3>
+              <p className="text-[8px] text-red-500 font-mono mt-1 uppercase tracking-widest">ALVO</p>
             </div>
           </div>
 
-          <div className="relative h-24 flex items-center justify-center mb-4 z-10">
-            <span className={`text-6xl transition-transform duration-300 ${status === 'ENEMY_TURN' ? 'scale-110' : 'scale-100 opacity-60'}`}>💀</span>
+          <div className="relative flex-1 flex items-center justify-center mb-2 z-10">
+            <div className={`transition-transform duration-300 ${status === 'ENEMY_TURN' ? 'scale-110' : 'scale-100 opacity-60'}`}>
+              <Icons name="skull" size={64} color={status === 'ENEMY_TURN' ? '#ef4444' : '#334155'} />
+            </div>
           </div>
 
-          <div className="space-y-1.5 z-10">
-            <div className="flex justify-between text-[10px] font-bold text-[#94a3b8] uppercase">
+          <div className="space-y-1 z-10">
+            <div className="flex justify-between text-[8px] font-bold text-slate-500 uppercase">
               <span className="font-mono">{enemy.hp} / {enemy.maxHp}</span>
-              <span>Energia Vital</span>
+              <span>Integridade</span>
             </div>
-            <div className="h-2 w-full bg-[#1e293b] rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#1e293b] rounded-full overflow-hidden">
               <div 
                 className={`h-full transition-all duration-500 ml-auto ${getHealthColor(enemy.hp, enemy.maxHp)}`}
                 style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }}
@@ -207,86 +209,102 @@ const DuelView: React.FC<DuelViewProps> = ({ character }) => {
         </div>
       </div>
 
-      {/* Action Interface */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Controls */}
-        <div className="lg:col-span-2 bg-[#11151d] border border-[#1e293b] rounded-xl p-6 shadow-xl">
-          <div className="mb-4 flex justify-between items-center">
-            <h4 className="text-xs font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Comandos de Combate</h4>
-            <div className="text-[10px] font-mono text-[#2dd4bf]">
-              {status === 'PLAYER_TURN' ? "SUA VEZ DE AGIR" : status === 'ENEMY_TURN' ? "INIMIGO PENSANDO..." : "AGUARDANDO DESAFIO"}
+        <div className="lg:col-span-2 bg-[#11151d] border border-[#1e293b] rounded-lg p-4 shadow-xl">
+          <div className="mb-3 flex justify-between items-center">
+            <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Controles de Operação</h4>
+            <div className={`text-[9px] font-mono ${status === 'PLAYER_TURN' ? 'text-[#3b82f6]' : 'text-slate-500'}`}>
+              {status === 'PLAYER_TURN' ? "AGUARDANDO COMANDO" : status === 'ENEMY_TURN' ? "ALVO EM MOVIMENTO..." : "STANDBY"}
             </div>
           </div>
 
           {status === 'IDLE' || status === 'WON' || status === 'LOST' ? (
             <button 
               onClick={startBattle}
-              className="w-full py-6 rounded-xl bg-gradient-to-r from-[#2dd4bf] to-[#0d9488] text-[#0b0e14] font-black uppercase tracking-[0.3em] text-xl shadow-lg shadow-[#2dd4bf]/20 hover:scale-[1.01] active:scale-95 transition-all"
+              className="w-full py-4 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#1e3a8a] text-white font-black uppercase tracking-widest text-sm shadow-lg shadow-[#3b82f6]/10 hover:brightness-110 active:scale-95 transition-all border-b-4 border-[#1e3a8a]"
             >
-              {status === 'IDLE' ? 'Iniciar Duelo' : status === 'WON' ? 'Lutar Novamente (Vitória!)' : 'Revanche (Derrota)'}
+              {status === 'IDLE' ? 'Iniciar Combate' : status === 'WON' ? 'Nova Operação (Sucesso)' : 'Tentar Novamente (Falha)'}
             </button>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               <button 
                 onClick={() => handleAction('BASIC')}
                 disabled={status !== 'PLAYER_TURN' || isProcessing}
-                className="group flex flex-col items-center justify-center p-4 bg-[#1e293b] border border-[#334155] rounded-lg hover:border-[#2dd4bf] hover:bg-[#2dd4bf]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-3 p-2 bg-[#1e293b] border border-[#334155] rounded hover:border-[#3b82f6] hover:bg-[#3b82f6]/5 transition-all disabled:opacity-50"
               >
-                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">👊</span>
-                <span className="text-xs font-bold text-white uppercase">Ataque Direto</span>
-                <span className="text-[8px] text-[#94a3b8] mt-1">Dano Estável | 100% Acerto</span>
+                <div className="w-8 h-8 flex items-center justify-center bg-black/40 rounded">
+                  <Icons name="fist" size={16} color="#3b82f6" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[10px] font-bold text-white uppercase">Ataque Direto</div>
+                  <div className="text-[7px] text-slate-500 uppercase">100% Acerto</div>
+                </div>
               </button>
               
               <button 
                 onClick={() => handleAction('HEAVY')}
                 disabled={status !== 'PLAYER_TURN' || isProcessing}
-                className="group flex flex-col items-center justify-center p-4 bg-[#1e293b] border border-[#334155] rounded-lg hover:border-[#f472b6] hover:bg-[#f472b6]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-3 p-2 bg-[#1e293b] border border-[#334155] rounded hover:border-[#3b82f6] hover:bg-[#3b82f6]/5 transition-all disabled:opacity-50"
               >
-                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">💥</span>
-                <span className="text-xs font-bold text-white uppercase">Golpe Brutal</span>
-                <span className="text-[8px] text-[#94a3b8] mt-1">Dano Alto | 70% Acerto</span>
+                <div className="w-8 h-8 flex items-center justify-center bg-black/40 rounded">
+                  <Icons name="heavy" size={16} color="#3b82f6" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[10px] font-bold text-white uppercase">Golpe Pesado</div>
+                  <div className="text-[7px] text-slate-500 uppercase">70% Acerto</div>
+                </div>
               </button>
 
               <button 
                 onClick={() => handleAction('DEFEND')}
                 disabled={status !== 'PLAYER_TURN' || isProcessing}
-                className="group flex flex-col items-center justify-center p-4 bg-[#1e293b] border border-[#334155] rounded-lg hover:border-blue-400 hover:bg-blue-400/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-3 p-2 bg-[#1e293b] border border-[#334155] rounded hover:border-[#3b82f6] hover:bg-[#3b82f6]/5 transition-all disabled:opacity-50"
               >
-                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">🛡️</span>
-                <span className="text-xs font-bold text-white uppercase">Defender</span>
-                <span className="text-[8px] text-[#94a3b8] mt-1">-50% Dano Recebido</span>
+                <div className="w-8 h-8 flex items-center justify-center bg-black/40 rounded">
+                  <Icons name="shield" size={16} color="#3b82f6" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[10px] font-bold text-white uppercase">Defender</div>
+                  <div className="text-[7px] text-slate-500 uppercase">-50% Dano</div>
+                </div>
               </button>
 
               <button 
                 onClick={() => handleAction('DIRTY')}
                 disabled={status !== 'PLAYER_TURN' || isProcessing}
-                className="group flex flex-col items-center justify-center p-4 bg-[#1e293b] border border-[#334155] rounded-lg hover:border-amber-400 hover:bg-amber-400/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-3 p-2 bg-[#1e293b] border border-[#334155] rounded hover:border-[#3b82f6] hover:bg-[#3b82f6]/5 transition-all disabled:opacity-50"
               >
-                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">🦶</span>
-                <span className="text-xs font-bold text-white uppercase">Golpe Baixo</span>
-                <span className="text-[8px] text-[#94a3b8] mt-1">Dano Baixo | Chance de Atordoar</span>
+                <div className="w-8 h-8 flex items-center justify-center bg-black/40 rounded">
+                  <Icons name="dirty" size={16} color="#3b82f6" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[10px] font-bold text-white uppercase">Estratégia</div>
+                  <div className="text-[7px] text-slate-500 uppercase">Atordoamento</div>
+                </div>
               </button>
             </div>
           )}
         </div>
 
         {/* Combat Log */}
-        <div className="bg-[#0b0e14] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden">
-          <div className="bg-[#171c26] px-4 py-3 border-b border-[#1e293b] flex justify-between items-center">
-            <h4 className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Relatório de Batalha</h4>
+        <div className="bg-[#0b0e14] border border-[#1e293b] rounded-lg flex flex-col overflow-hidden max-h-48 lg:max-h-none">
+          <div className="bg-[#171c26] px-3 py-2 border-b border-[#1e293b]">
+            <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Logs de Rede</h4>
           </div>
-          <div className="p-4 flex-1 font-mono text-[10px] space-y-2 overflow-y-auto bg-[#0b0e14]">
+          <div className="p-3 flex-1 font-mono text-[9px] space-y-1.5 overflow-y-auto bg-[#0b0e14] scrollbar-thin">
             {log.map((line, i) => (
-              <div key={i} className={`p-2 rounded border-l-2 ${
-                line.includes('Você') ? 'border-[#2dd4bf] bg-[#2dd4bf]/5 text-[#2dd4bf]' : 
-                line.includes('inimigo') ? 'border-[#ef4444] bg-[#ef4444]/5 text-[#ef4444]' : 
-                'border-[#334155] text-[#94a3b8]'
+              <div key={i} className={`p-1.5 rounded border-l-2 ${
+                line.includes('Sindicato') || line.includes('Protocolo') ? 'border-[#3b82f6] bg-[#3b82f6]/5 text-[#3b82f6]' : 
+                line.includes('Alvo') || line.includes('sofrido') ? 'border-red-500 bg-red-500/5 text-red-400' : 
+                line.includes('Tática') ? 'border-purple-500 bg-purple-500/5 text-purple-400' :
+                'border-slate-800 text-slate-600'
               }`}>
                 {line}
               </div>
             ))}
             {log.length === 0 && (
-              <div className="h-full flex items-center justify-center opacity-20 italic">Aguardando início...</div>
+              <div className="h-full flex items-center justify-center opacity-20 italic uppercase tracking-widest">Escaneando...</div>
             )}
           </div>
         </div>

@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Item, ItemType, Mission } from './types';
 
 export const INITIAL_ITEMS: Item[] = [
@@ -11,7 +10,7 @@ export const INITIAL_ITEMS: Item[] = [
     stats: { attack: 5 },
     price: 150,
     currency: 'cash',
-    icon: '👊'
+    icon: 'fist'
   },
   {
     id: 'w2',
@@ -21,7 +20,7 @@ export const INITIAL_ITEMS: Item[] = [
     stats: { attack: 15, luck: 2 },
     price: 1200,
     currency: 'cash',
-    icon: '🔫'
+    icon: 'pistol'
   },
   {
     id: 'a1',
@@ -31,7 +30,7 @@ export const INITIAL_ITEMS: Item[] = [
     stats: { defense: 8 },
     price: 200,
     currency: 'cash',
-    icon: '🧥'
+    icon: 'armor'
   },
   {
     id: 'a2',
@@ -41,7 +40,7 @@ export const INITIAL_ITEMS: Item[] = [
     stats: { defense: 25, health: 50 },
     price: 15,
     currency: 'gold',
-    icon: '🛡️'
+    icon: 'shield'
   }
 ];
 
@@ -76,9 +75,10 @@ export const UI_COLORS = {
   bg: '#0b0e14',
   card: '#11151d',
   cardHeader: '#171c26',
-  accent: '#2dd4bf', // Teal (Essentials)
-  secondary: '#f472b6', // Pink (Future)
-  warning: '#fbbf24', // Amber (Gold)
+  accent: '#fbbf24', // Amarelo (Agora apenas para detalhes de ouro/destaque)
+  primary: '#3b82f6', // Azul (Predominante)
+  secondary: '#60a5fa', // Azul Claro
+  warning: '#fbbf24',
   danger: '#ef4444',
   muted: '#94a3b8',
   border: '#1e293b'
